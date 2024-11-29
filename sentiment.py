@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from Sentiment_Analysis.predict import SentimentAnalysis
+from predict import SentimentAnalysis
 import uvicorn
 
 
