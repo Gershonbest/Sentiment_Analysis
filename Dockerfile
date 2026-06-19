@@ -1,21 +1,32 @@
-FROM python:3.12-slim as python
-ENV PYTHONUNBUFFERED True
+# Ray base image with CUDA, PyTorch, and Ray preinstalled.
+FROM rayproject/ray:latest-gpu
 
-# Install Poetry
-ENV POETRY_VERSION=1.8.3
-ENV POETRY_VIRTUALENVS_IN_PROJECT=false
+WORKDIR /app
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir poetry==$POETRY_VERSION
-# Configure Poetry to not use virtual environments
-RUN poetry config virtualenvs.create false
+USER root
 
-WORKDIR /code
-COPY . /code/
-# Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi --no-cache --no-root --only main
+# Install uv and resolve dependencies from lockfile into a project venv.
+RUN pip install --no-cache-dir --upgrade pip uv
+
+# Copy dependency metadata first for better build cache reuse.
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Copy project source.
+COPY . /app
+
+# Drop privileges for runtime.
+RUN chown -R ray:users /app
+USER ray
+
+ENV PYTHONUNBUFFERED=1 \
+	PYTHONDONTWRITEBYTECODE=1 \
+	PATH="/app/.venv/bin:$PATH" \
+	RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0 \
+	ML_HOST=0.0.0.0 \
+	ML_HTTP_PORT=8000
+
+EXPOSE 8000 8265
 
 
-EXPOSE 8000
-# CMD ["uvicorn", "serve:app", "--host", "0.0.0.0", "--port", "8080"]
-CMD ["python3", "sentiment.py"]
+CMD ["python", "run.py"]
