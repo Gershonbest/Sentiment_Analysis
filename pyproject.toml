@@ -1,20 +1,10 @@
-[tool.poetry]
-name = "sentiment"
+[project]
+name = "sentiment-analysis"
 version = "0.1.0"
-description = "predict the sentitent"
-authors = ["Gershon Mac <gershon.o@mblhightech.net>"]
+description = "Add your description here"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "3.11.10"
-fastapi = "^0.115.4"
-pydantic = "^2.9.2"
-transformers = "^4.46.3"
-uvicorn = "^0.32.1"
-tensorflow = "^2.18.0"
-tf-keras = "^2.18.0"
-torch = "^2.5.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.12"
+dependencies = [
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.14.2",
+]
